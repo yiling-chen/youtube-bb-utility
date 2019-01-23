@@ -4,6 +4,8 @@ import sys
 import cv2
 import pandas as pd
 import numpy as np
+import argparse
+
 
 # The data sets to be downloaded
 d_sets = ['yt_bb_detection_validation', 'yt_bb_detection_train']
@@ -60,17 +62,28 @@ def parse_video(data, vid, f):
                 (img1_filename, img2_filename, x1_1, y1_1, x1_2-x1_1, y1_2-y1_1, x2_1, y2_1, x2_2-x2_1, y2_2-y2_1))
 
 
-def parse_all():
-    df = pd.read_csv('yt_bb_detection_validation.csv', header=None, index_col=False)
+def parse_all(dataset, filename):
+    df = pd.read_csv(dataset, header=None, index_col=False)
     df.columns = col_names
 
     # Get list of unique video files
     vids = df['youtube_id'].unique()
 
-    with open('imglist.txt', 'w') as f:
-        for vid in vids[100:1100]:
+    with open(filename, 'w') as f:
+        for vid in vids:
             parse_video(df[df['youtube_id'] == vid], vid, f)
 
 
 if __name__ == "__main__":
-    parse_all()
+    parser = argparse.ArgumentParser(
+        description='Sample image pairs from Youtube-BB dataset.')
+    parser.add_argument('-d', '--dataset', type=str, default='./yt_bb_detection_validation.csv',
+                        help='csv filename of Youtube-BB dataset [default: ./yt_bb_detection_validation.csv]')
+    parser.add_argument('-f', '--filename', type=str, 
+                        help='Output filename of the sampled image pairs')
+    args = parser.parse_args()
+
+    dataset = args.dataset
+    filename = args.filename    
+
+    parse_all(dataset, filename)
